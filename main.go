@@ -1,12 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/mmeow0/go-capturer/api"
+	"github.com/mmeow0/go-capturer/models"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,7 +38,6 @@ func main() {
 	defer ln.Close()
 
 	accessToken := api.Login(address, user, password)
-	log.Infoln(accessToken)
 
 	ch := make(chan []byte)
 	eCh := make(chan error)
@@ -65,7 +67,16 @@ func main() {
 		for {
 			select {
 			case data := <-ch:
-				log.Infoln("Accepting:", string(data))
+				for _, d := range strings.Split(string(data), "uPMf1gZsTwt2TNh\n") {
+					byt := []byte(d)
+					packet := &models.Packet{}
+					if err := json.Unmarshal(byt, &packet); err != nil {
+						continue
+					} else {
+						go api.Create(address, accessToken, []byte(string(d)))
+					}
+				}
+
 			case err := <-eCh:
 				log.Warnln("Error accepting:", err.Error())
 				return

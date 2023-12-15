@@ -16,7 +16,7 @@ func Login(address string, user string, password string) string {
 
 	u, _ := url.ParseRequestURI(apiUrl)
 	u.Path = resource
-	urlStr := u.String() // "https://api.com/signup"
+	urlStr := u.String() // "https://api.com/login"
 
 	loginData := url.Values{
 		"email":    {user},
@@ -38,6 +38,8 @@ func Login(address string, user string, password string) string {
 	if derr != nil {
 		log.Fatalln("Cannot decode response:", err.Error())
 	}
+
+	log.Infoln("Login success")
 
 	return loginResp.AccessToken
 
